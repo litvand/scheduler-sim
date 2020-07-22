@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Scheduler</title>
+
+        <script src="js/assert.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/int.js"></script>
+        <script src="js/elem.js"></script>
+        <script src="js/timepart.js"></script>
+        <script src="js/proc.js"></script>
+        <script src="js/block.js"></script>
+        <script src="js/priorityqueue.js"></script>
+        <script src="js/stack.js"></script>
+        <script src="js/sim.js"></script>
+        <script src="js/waittime.js"></script>
+        <script src="js/gui.js"></script>
+        <script src="js/main.js"></script>
+    </head>
+    <body onload="run()">
+        <canvas id="myCanvas" width="610" height="140"></canvas>
+        <br/>
+
+        <div style="display: inline-block; width: 80px;">Processes:</div> 
+        <input size=50 type="text" id="procs" value="0,3; 1,1; 5,2;5,1;5,1" oninput="GUI.updateProcs()">
+        <br/>
+
+        <div style="display: inline-block; width: 80px;">Method:</div>
+        <input size=50 type="text" id="method" value="rr" oninput="GUI.updateMethod()">
+        (fcfs, sjf, srtf, rr)
+        <br/>
+        <br/>
+
+        <div style="display: inline-block; width: 80px;">Examples:</div>
+        <button onclick="GUI.setExample(0)" id="example0">1,8;3,5;4,3;12,1;19,1</button>&nbsp;&nbsp;
+        <button onclick="GUI.setExample(1)" id="example1">1,10;4,2;12,3;13,2</button>&nbsp;&nbsp;
+        <button onclick="GUI.setExample(2)" id="example2">2,2;2,2;2,2;2,2;2,2;2,2;2,2;2,2;2,2;2,2</button>
+    </body>
+</html>

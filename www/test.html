@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!--<meta http-equiv="refresh" content="30">-->
+        <title>PID testing</title>
+
+        <script>
+            var c;
+            function init(){
+                c = document.getElementById("myCanvas").getContext("2d");
+                edited();
+            }
+
+            function edited(){
+                pidP = parseFloat(document.getElementById("Pterm").value)/100.0;
+                pidI = parseFloat(document.getElementById("Iterm").value)/100.0;
+                pidD = parseFloat(document.getElementById("Dterm").value)/100.0;
+                resetPIDController();
+                repaint();
+            }
+
+            function repaint(){
+                c.fillStyle="#AAAAAA";
+                c.fillRect(0, 0, 800, 500);
+
+
+                //Draw the wanted graph
+                c.strokeStyle = "#000000";
+                c.beginPath();
+                for(x = 0; x < 800; x++){
+                    c.lineTo(x, val(x));
+                }
+                c.stroke();
+
+
+                //draw bad places
+                for(x = 0; x < 800; x++){
+                    var err = crosswind(x);
+                    if(err != 0  ||  x%10==0){
+                        c.strokeStyle = "#FF0000";
+                        c.beginPath();
+                        c.lineTo(x-1, 400 + crosswind(x-1));
+                        c.lineTo(x, 400 + err);
+                        c.stroke();
+                    }
+                }
+                
+
+
+                //draw the graph with the PID controller
+                c.strokeStyle = "#00FF00";
+                c.beginPath();
+                pidy = 0;
+                var error_sum = 0;
+                for(x = 0; x < 800; x++){
+                    //pidy += the pid output (input: the current error)
+                    var error = val(x) - pidy;
+                    error_sum += error*error;
+
+                    var change = pid(error);
+                    pidy += change;
+
+                    //add some external factors
+                    pidy += crosswind(x);
+                    
+                    c.lineTo(x, pidy);
+                    
+                }
+                error_sum = parseInt(10000 - Math.sqrt(error_sum));
+                c.stroke();
+
+                
+                c.fillStyle="#000000";
+                c.font = "30px Arial";
+                c.fillText("Jürgeni PID tester",10,40);
+                if(error_sum < -10000){
+                    c.fillText("Score: -10000", 600, 40);
+                }else{
+                    c.fillText("Score: " + error_sum, 600, 40);
+                }
+                
+
+                c.font = "11px Arial";
+                c.fillText("P-term: " + pidP, 10, 60);
+                c.fillText("I-term: " + pidI, 10, 75);
+                c.fillText("D-term: " + pidD, 10, 90);
+                
+                c.fillText("10000 - (the RMS of the errors)",600,55);
+                                
+
+            }
+
+            var pidP = 1.9;
+            var pidI = 0.1121;
+            var pidD = 0.9;
+            var derivative = 0;
+            var integral = 0;
+            var lastError = 0;
+            function pid(error){
+                var ans = 0;
+                var dt = 1;
+
+                integral += error*dt;
+                derivative += (lastError - error)/dt;
+
+                ans += pidP * error + pidI * integral + pidD * derivative;
+
+                lastError = error;
+                return ans;
+            }
+
+            function resetPIDController(){
+                derivative = 0;
+                integral = 0;
+                lastError = 0;
+            }
+
+            function val(x){
+
+                if(x > 0  && x < 600){
+                    return Math.sin(x*Math.PI/360.0*Math.log(x))*x/3+250;
+                }else if(x < 700){
+                    return x-400
+                }else{
+                    return 200;
+                }
+
+            }
+
+            function crosswind(x){
+                if(x > 300  &&  x < 500){
+                    return -100;
+                }else if(x > 600  &&  x < 700){
+                    return Math.sin(x/10)*50;
+                }else{
+                    return 0;
+                }
+            }
+
+        </script>
+    </head>
+    <body onload="init()">
+        <canvas id="myCanvas" width="800" height="500" style="background: #AAA"></canvas>
+        <br/>
+        <div style="display: inline-block; width: 90px;">PID P-term:</div> 
+        <input type="number" id="Pterm" value="110" oninput="edited();"> /100<br/>
+
+        <div style="display: inline-block; width: 90px;">PID I-term:</div> 
+        <input type="number" id="Iterm" value="30" oninput="edited();"> /100<br/>
+
+        <div style="display: inline-block; width: 90px;">PID D-term:</div> 
+        <input type="number" id="Dterm" value="11" oninput="edited();"> /100<br/>
+
+
+
+    </body>
+</html>
